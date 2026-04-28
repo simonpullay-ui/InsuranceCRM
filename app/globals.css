@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Manrope", "Segoe UI", sans-serif;
+  --color-branch-navy: #102a43;
+  --color-branch-sky: #3a7bd5;
+  --color-branch-cyan: #c8f0ff;
+  --color-branch-slate: #52606d;
+  --color-branch-ink: #243b53;
+  --color-branch-mist: #f3f7fb;
+  --color-branch-line: #d9e2ec;
+  --color-status-gray: #94a3b8;
+  --color-status-yellow: #facc15;
+  --color-status-blue: #38bdf8;
+  --color-status-orange: #fb923c;
+  --color-status-red: #f87171;
+  --color-status-green: #34d399;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  background:
+    radial-gradient(circle at top left, rgba(58, 123, 213, 0.15), transparent 30%),
+    radial-gradient(circle at top right, rgba(52, 211, 153, 0.12), transparent 18%),
+    linear-gradient(180deg, #f8fbff 0%, #eff5fb 100%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.surface {
+  @apply rounded-3xl border border-white/70 bg-white/90 shadow-[0_18px_60px_rgba(15,23,42,0.08)] backdrop-blur;
+}
+
+.surface-muted {
+  @apply rounded-2xl border border-slate-200 bg-slate-50;
+}
+
+.field {
+  @apply w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-sky-400 focus:ring-4 focus:ring-sky-100;
+}
+
+.label {
+  @apply mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500;
+}
+
+.chip {
+  @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold;
+}
+
+.grid-auto-fit {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+a,
+button {
+  cursor: pointer;
+}
