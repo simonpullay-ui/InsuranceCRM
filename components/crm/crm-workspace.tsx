@@ -20,7 +20,6 @@ import {
   Workflow,
 } from "lucide-react";
 import {
-  CRM_STORAGE_KEY,
   buildSmsHref,
   createId,
   createLead,
@@ -64,11 +63,46 @@ const emptyLeadForm = {
   marital_status: "",
 };
 
+type ApiLeadRecord = {
+  id: string;
+  pipeline_id: string;
+  stage_id: string;
+  lead_name: string;
+  phone: string;
+  date_of_birth: string;
+  email: string;
+  lead_type: string;
+  state: string;
+  address: string;
+  age: string;
+  gender: string;
+  marital_status: string;
+  status: string;
+  notes: Lead["notes"];
+  metadata: {
+    first_name?: string;
+    last_name?: string;
+    last_outcome?: string | null;
+    last_contacted_at?: string | null;
+    created_at?: string;
+    updated_at?: string;
+    [key: string]: unknown;
+  } | null;
+  created_at: string;
+  updated_at: string;
+  last_outcome: string | null;
+  last_contacted_at: string | null;
+};
+
 export function CRMWorkspace({ view }: CRMWorkspaceProps) {
-  const [state, setState] = useState<CRMState>(sampleState);
+  const [state, setState] = useState<CRMState>({
+    ...sampleState,
+    leads: [],
+  });
   const [hasHydrated, setHasHydrated] = useState(false);
+  const [loadError, setLoadError] = useState("");
   const [activePipelineId, setActivePipelineId] = useState(sampleState.pipelines[0]?.id ?? "");
-  const [selectedLeadId, setSelectedLeadId] = useState(sampleState.leads[0]?.id ?? "");
+  const [selectedLeadId, setSelectedLeadId] = useState("");
   const [activeScriptId, setActiveScriptId] = useState(sampleState.scriptTemplates[0]?.id ?? "");
   const [activeTextTemplateId, setActiveTextTemplateId] = useState(sampleState.textTemplates[0]?.id ?? "");
   const [activeDialSessionId, setActiveDialSessionId] = useState(sampleState.dialSessions[0]?.id ?? "");
@@ -89,30 +123,44 @@ export function CRMWorkspace({ view }: CRMWorkspaceProps) {
   const [draggedLeadId, setDraggedLeadId] = useState<string | null>(null);
 
   useEffect(() => {
-    const raw = window.localStorage.getItem(CRM_STORAGE_KEY);
-    if (raw) {
+    let cancelled = false;
+    async function loadLeads() {
       try {
-        const parsed = JSON.parse(raw) as CRMState;
-        setState(parsed);
-        setActivePipelineId(parsed.pipelines[0]?.id ?? "");
-        setSelectedLeadId(parsed.leads[0]?.id ?? "");
-        setActiveScriptId(parsed.scriptTemplates[0]?.id ?? "");
-        setActiveTextTemplateId(parsed.textTemplates[0]?.id ?? "");
-        setActiveDialSessionId(parsed.dialSessions[0]?.id ?? "");
-      } catch {
-        window.localStorage.removeItem(CRM_STORAGE_KEY);
+        const response = await fetch("/api/crm/leads");
+        if (!response.ok) {
+          throw new Error("Unable to load CRM leads.");
+        }
+
+        const payload = (await response.json()) as { leads: ApiLeadRecord[] };
+        if (cancelled) {
+          return;
+        }
+        const dbLeads = payload.leads.map(mapApiLeadToLead);
+        setState((current) => ({ ...current, leads: dbLeads }));
+        setSelectedLeadId(dbLeads[0]?.id ?? "");
+      } catch (error) {
+        if (!cancelled) {
+          setLoadError(error instanceof Error ? error.message : "Unable to load CRM leads.");
+        }
+      } finally {
+        if (!cancelled) {
+          setHasHydrated(true);
+        }
       }
     }
-    setHasHydrated(true);
+
+    void loadLeads();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
-    if (!hasHydrated) {
-      return;
+    if (!selectedLeadId && state.leads[0]?.id) {
+      setSelectedLeadId(state.leads[0].id);
     }
-
-    window.localStorage.setItem(CRM_STORAGE_KEY, JSON.stringify(state));
-  }, [hasHydrated, state]);
+  }, [selectedLeadId, state.leads]);
 
   const pipelines = state.pipelines;
   const activePipeline = pipelines.find((pipeline) => pipeline.id === activePipelineId) ?? pipelines[0];
@@ -153,6 +201,88 @@ export function CRMWorkspace({ view }: CRMWorkspaceProps) {
     dialerLeadQueue.findIndex((lead) => lead.id === selectedLead?.id),
   );
   const dashboardStats = buildDashboardStats(state);
+
+  function mapApiLeadToLead(record: ApiLeadRecord): Lead {
+    return {
+      id: record.id,
+      pipelineId: record.pipeline_id,
+      stageId: record.stage_id,
+      lead_name: record.lead_name,
+      phone: record.phone,
+      date_of_birth: record.date_of_birth,
+      email: record.email,
+      lead_type: record.lead_type,
+      state: record.state,
+      address: record.address,
+      age: record.age,
+      gender: record.gender,
+      marital_status: record.marital_status,
+      notes: Array.isArray(record.notes) ? record.notes : [],
+      lastOutcome: record.last_outcome ?? record.metadata?.last_outcome ?? null,
+      lastContactedAt: record.last_contacted_at ?? record.metadata?.last_contacted_at ?? null,
+      createdAt: record.created_at,
+      updatedAt: record.updated_at,
+    };
+  }
+
+  async function parseResponseError(response: Response) {
+    const payload = await response.json().catch(() => null);
+    return (payload?.error as string) ?? "Unable to save CRM update.";
+  }
+
+  async function saveLeadUpdate(payload: Record<string, unknown>) {
+    const response = await fetch("/api/crm/leads", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      throw new Error(await parseResponseError(response));
+    }
+
+    const created = (await response.json()) as ApiLeadRecord;
+    return created;
+  }
+
+  async function patchLead(id: string, payload: Record<string, unknown>) {
+    const response = await fetch(`/api/crm/leads/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      throw new Error(await parseResponseError(response));
+    }
+
+    const updated = (await response.json()) as ApiLeadRecord;
+    return updated;
+  }
+
+  async function logActivity(payload: { leadId: string; outcome: string; summary: string; notes: string }) {
+    const response = await fetch("/api/crm/activities", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        lead_id: payload.leadId,
+        activity_type: "call",
+        outcome: payload.outcome,
+        summary: payload.summary,
+        notes: payload.notes,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(await parseResponseError(response));
+    }
+  }
 
   function updateState(recipe: (current: CRMState) => CRMState) {
     setState((current) => recipe(current));
@@ -212,43 +342,81 @@ export function CRMWorkspace({ view }: CRMWorkspaceProps) {
     setNewStageName("");
   }
 
-  function addLead(event: FormEvent<HTMLFormElement>) {
+  async function addLead(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!activePipeline) {
       return;
     }
 
     const stageId = getDefaultStageId(activePipeline);
-    const lead = createLead({
+    const initialLead = createLead({
       id: createId("lead"),
       pipelineId: activePipeline.id,
       stageId,
-      notes: [note("Lead created manually.", "system")],
       ...newLeadValues,
+      notes: [note("Lead created manually.", "system")],
     });
 
-    updateState((current) => ({
-      ...current,
-      leads: [lead, ...current.leads],
-    }));
-    setSelectedLeadId(lead.id);
-    setNewLeadValues(emptyLeadForm);
+    try {
+      const created = await saveLeadUpdate({
+        lead_name: initialLead.lead_name,
+        pipeline_id: initialLead.pipelineId,
+        stage_id: initialLead.stageId,
+        phone: initialLead.phone,
+        date_of_birth: initialLead.date_of_birth,
+        email: initialLead.email,
+        lead_type: initialLead.lead_type,
+        state: initialLead.state,
+        address: initialLead.address,
+        age: initialLead.age,
+        gender: initialLead.gender,
+        marital_status: initialLead.marital_status,
+        notes: initialLead.notes,
+        status: "active",
+        last_outcome: null,
+        last_contacted_at: null,
+        metadata: {},
+      });
+      const lead = mapApiLeadToLead(created);
+      updateState((current) => ({
+        ...current,
+        leads: [lead, ...current.leads],
+      }));
+      setSelectedLeadId(lead.id);
+      setNewLeadValues(emptyLeadForm);
+      setImportMessage("");
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : "Unable to create lead.");
+    }
   }
 
-  function moveLeadToStage(leadId: string, stageId: string) {
-    updateState((current) => ({
-      ...current,
-      leads: current.leads.map((lead) =>
-        lead.id === leadId
-          ? {
-              ...lead,
-              stageId,
-              updatedAt: new Date().toISOString(),
-              notes: [...lead.notes, note(`Moved to ${findStageName(current.pipelines, lead.pipelineId, stageId)}.`, "system")],
-            }
-          : lead,
-      ),
-    }));
+  async function moveLeadToStage(leadId: string, stageId: string) {
+    const lead = state.leads.find((item) => item.id === leadId);
+    if (!lead) {
+      return;
+    }
+
+    const noteText = `Moved to ${findStageName(state.pipelines, lead.pipelineId, stageId)}.`;
+    const notes = [...lead.notes, note(noteText, "system")];
+
+    try {
+      const updated = await patchLead(lead.id, {
+        pipeline_id: lead.pipelineId,
+        stage_id: stageId,
+        notes,
+        last_outcome: lead.lastOutcome,
+        last_contacted_at: lead.lastContactedAt,
+        status: "active",
+      });
+
+      const mappedLead = mapApiLeadToLead(updated);
+      updateState((current) => ({
+        ...current,
+        leads: current.leads.map((item) => (item.id === mappedLead.id ? { ...item, ...mappedLead } : item)),
+      }));
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : "Unable to move lead.");
+    }
   }
 
   function toggleVisibleField(field: LeadFieldKey) {
@@ -348,44 +516,65 @@ export function CRMWorkspace({ view }: CRMWorkspaceProps) {
     setNewOutcomeTemplate("");
   }
 
-  function applyOutcome(button: OutcomeButton) {
+  async function applyOutcome(button: OutcomeButton) {
     if (!selectedLead) {
       return;
     }
 
     const outcomeText = renderTemplate(button.noteTemplate, selectedLead);
-    updateState((current) => ({
-      ...current,
-      leads: current.leads.map((lead) =>
-        lead.id === selectedLead.id
-          ? {
-              ...lead,
-              lastOutcome: button.label,
-              lastContactedAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-              notes: [...lead.notes, note(outcomeText, "outcome")],
-            }
-          : lead,
-      ),
-      dialSessions: current.dialSessions.map((session) =>
-        session.id === activeDialSession?.id
-          ? {
-              ...session,
-              completedDials: session.completedDials + 1,
-              connectedDials:
-                button.label === "No Answer" ? session.connectedDials : session.connectedDials + 1,
-              outcomes: {
-                ...session.outcomes,
-                [button.label]: (session.outcomes[button.label] ?? 0) + 1,
-              },
-            }
-          : session,
-      ),
-    }));
+    const nextNotes = [...selectedLead.notes, note(outcomeText, "outcome")];
+    const now = new Date().toISOString();
 
-    const nextLead = dialerLeadQueue[dialerLeadIndex + 1];
-    if (nextLead) {
-      setSelectedLeadId(nextLead.id);
+    try {
+      await logActivity({
+        leadId: selectedLead.id,
+        outcome: button.label,
+        summary: outcomeText,
+        notes: outcomeText,
+      });
+      const updated = await patchLead(selectedLead.id, {
+        notes: nextNotes,
+        last_outcome: button.label,
+        last_contacted_at: now,
+        stage_id: selectedLead.stageId,
+        pipeline_id: selectedLead.pipelineId,
+        status: "active",
+      });
+      const mappedLead = mapApiLeadToLead(updated);
+
+      updateState((current) => ({
+        ...current,
+        leads: current.leads.map((lead) =>
+          lead.id === mappedLead.id
+            ? {
+                ...mappedLead,
+                notes: nextNotes,
+                updatedAt: now,
+              }
+            : lead,
+        ),
+        dialSessions: current.dialSessions.map((session) =>
+          session.id === activeDialSession?.id
+            ? {
+                ...session,
+                completedDials: session.completedDials + 1,
+                connectedDials:
+                  button.label === "No Answer" ? session.connectedDials : session.connectedDials + 1,
+                outcomes: {
+                  ...session.outcomes,
+                  [button.label]: (session.outcomes[button.label] ?? 0) + 1,
+                },
+              }
+            : session,
+        ),
+      }));
+
+      const nextLead = dialerLeadQueue[dialerLeadIndex + 1];
+      if (nextLead) {
+        setSelectedLeadId(nextLead.id);
+      }
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : "Unable to save dial outcome.");
     }
   }
 
@@ -436,12 +625,42 @@ export function CRMWorkspace({ view }: CRMWorkspaceProps) {
     }
 
     const imported = mergeImportedLeads(rows, activePipeline.id, getDefaultStageId(activePipeline));
-    updateState((current) => ({
-      ...current,
-      leads: [...imported, ...current.leads],
-    }));
-    setImportMessage(`Imported ${imported.length} leads into ${activePipeline.name}.`);
-    event.target.value = "";
+    const savedLeads: Lead[] = [];
+
+    try {
+      for (const lead of imported) {
+        const created = await saveLeadUpdate({
+          lead_name: lead.lead_name,
+          pipeline_id: lead.pipelineId,
+          stage_id: lead.stageId,
+          phone: lead.phone,
+          date_of_birth: lead.date_of_birth,
+          email: lead.email,
+          lead_type: lead.lead_type,
+          state: lead.state,
+          address: lead.address,
+          age: lead.age,
+          gender: lead.gender,
+          marital_status: lead.marital_status,
+          notes: lead.notes,
+          status: "active",
+          last_outcome: null,
+          last_contacted_at: null,
+          metadata: {},
+        });
+        savedLeads.push(mapApiLeadToLead(created));
+      }
+
+      updateState((current) => ({
+        ...current,
+        leads: [...savedLeads, ...current.leads],
+      }));
+      setImportMessage(`Imported ${savedLeads.length} leads into ${activePipeline.name}.`);
+    } catch (error) {
+      setImportMessage(error instanceof Error ? error.message : "Unable to import one or more leads.");
+    } finally {
+      event.target.value = "";
+    }
   }
 
   if (!hasHydrated) {
@@ -451,6 +670,7 @@ export function CRMWorkspace({ view }: CRMWorkspaceProps) {
         <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">
           Pulling your pipelines, scripts, and dial sessions into place.
         </h1>
+        {loadError ? <p className="mt-3 text-sm font-semibold text-rose-700">{loadError}</p> : null}
       </section>
     );
   }

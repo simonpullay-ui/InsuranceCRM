@@ -21,6 +21,8 @@ export const paymentStatusClasses: Record<PaymentStatus, string> = {
 };
 
 export const navigation: Array<{ href: Route; label: string; description: string }> = [
+  { href: "/jobs", label: "Jobs", description: "Track and manage work orders in one place." },
+  { href: "/calendar", label: "Calendar", description: "View scheduled installs and move jobs by date." },
   { href: "/dashboard", label: "Dashboard", description: "Daily pipeline and dial activity." },
   { href: "/pipelines", label: "Pipelines", description: "Drag leads across custom stages." },
   { href: "/dialer", label: "Dialer", description: "Run scripts, rotate leads, and log outcomes." },

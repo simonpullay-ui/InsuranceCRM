@@ -10,6 +10,15 @@ export async function PATCH(request: Request, context: RouteContext) {
   const { id } = await context.params;
   const payload = await request.json();
   const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: userError?.message ?? "Unauthorized" }, { status: 401 });
+  }
+
   const { data, error } = await supabase
     .from("jobs")
     .update(sanitizeJobPayload(payload))
@@ -28,6 +37,15 @@ export async function PATCH(request: Request, context: RouteContext) {
 export async function DELETE(_request: Request, context: RouteContext) {
   const { id } = await context.params;
   const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: userError?.message ?? "Unauthorized" }, { status: 401 });
+  }
+
   const { error } = await supabase.from("jobs").delete().eq("id", id);
 
   if (error) {

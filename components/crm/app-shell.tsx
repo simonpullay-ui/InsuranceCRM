@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  CalendarRange,
   BriefcaseBusiness,
   LayoutDashboard,
   LogOut,
@@ -15,6 +16,8 @@ import { navigation } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 const icons = {
+  "/jobs": BriefcaseBusiness,
+  "/calendar": CalendarRange,
   "/dashboard": LayoutDashboard,
   "/pipelines": Workflow,
   "/dialer": PhoneCall,

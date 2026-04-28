@@ -98,8 +98,6 @@ export type CRMState = {
   dialSessions: DialSession[];
 };
 
-export const CRM_STORAGE_KEY = "policyflow-crm-state-v1";
-
 export const fieldLabels: Record<LeadFieldKey, string> = {
   lead_name: "Lead Name",
   phone: "Number",

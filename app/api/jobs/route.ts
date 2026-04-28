@@ -4,6 +4,15 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export async function POST(request: Request) {
   const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: userError?.message ?? "Unauthorized" }, { status: 401 });
+  }
+
   const payload = await request.json();
 
   const { data, error } = await supabase.from("jobs").insert(sanitizeJobPayload(payload)).select().single();
