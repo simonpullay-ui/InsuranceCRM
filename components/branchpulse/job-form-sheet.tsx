@@ -122,20 +122,20 @@ export function JobFormSheet({ job, open, onClose, onSaved }: JobFormSheetProps)
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-slate-950/45 backdrop-blur-sm">
-      <div className="flex h-full w-full max-w-3xl flex-col overflow-hidden bg-white">
-        <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
+      <div className="flex h-full w-full max-w-3xl flex-col overflow-hidden border border-white/55 bg-white/72 backdrop-blur-2xl">
+        <div className="flex items-center justify-between border-b border-slate-200/70 px-6 py-5">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-slate-500">
               {isEditing ? "Edit job" : "New job"}
             </p>
             <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-950">
-              {isEditing ? values.customer_name : "Create BranchPulse job"}
+              {isEditing ? values.customer_name : "Create Auralis job"}
             </h2>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-2xl border border-slate-200 p-3 text-slate-500 transition hover:bg-slate-50 hover:text-slate-950"
+            className="auralis-button-secondary size-11 p-0"
           >
             <X className="size-4" />
           </button>
@@ -220,10 +220,10 @@ export function JobFormSheet({ job, open, onClose, onSaved }: JobFormSheetProps)
           </div>
 
           <div className="mt-8 flex flex-col gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:justify-end">
-            <button type="button" onClick={onClose} className="rounded-2xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+            <button type="button" onClick={onClose} className="auralis-button-secondary">
               Cancel
             </button>
-            <button type="submit" disabled={saving} className="rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60">
+            <button type="submit" disabled={saving} className="auralis-button-primary disabled:cursor-not-allowed disabled:opacity-60">
               {saving ? "Saving..." : isEditing ? "Update job" : "Create job"}
             </button>
           </div>

@@ -447,30 +447,30 @@ export function CRMWorkspace({ view }: CRMWorkspaceProps) {
   if (!hasHydrated) {
     return (
       <section className="surface p-8">
-        <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Loading CRM</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">Loading Auralis</p>
         <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">
-          Pulling your pipelines, scripts, and dial sessions into place.
+          Preparing your workspace, live pipelines, and operator controls.
         </h1>
       </section>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="auralis-scroll space-y-6">
       {view === "dashboard" ? (
         <>
           <section className="surface p-6">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-700">
-                  Life Insurance Agent Dashboard
+                  Auralis Control Center
                 </p>
                 <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">
-                  Keep your pipeline moving and your dial volume visible.
+                  Keep every opportunity, script, and call block moving in one view.
                 </h1>
                 <p className="mt-3 max-w-3xl text-sm text-slate-600">
-                  This CRM is built around the actual calling workflow: multiple pipelines, drag-and-drop stages,
-                  quick outcomes, scripts with lead merge fields, and follow-up texts you can send from your phone.
+                  Auralis keeps your operating rhythm clear with multiple pipelines, drag-and-drop stages,
+                  fast outcomes, script merge fields, and outreach controls in one intelligence layer.
                 </p>
               </div>
               <div className="grid gap-2 sm:grid-cols-2">
@@ -497,7 +497,7 @@ export function CRMWorkspace({ view }: CRMWorkspaceProps) {
                     Stage counts by pipeline
                   </h2>
                 </div>
-                <Link href="/pipelines" className="text-sm font-semibold text-cyan-700">
+                <Link href="/pipelines" className="text-sm font-semibold text-blue-700">
                   Manage pipeline
                 </Link>
               </div>
@@ -577,14 +577,14 @@ export function CRMWorkspace({ view }: CRMWorkspaceProps) {
                 </h1>
               </div>
               <div className="grid gap-2 sm:grid-cols-3">
-                <label className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700">
+                <label className="auralis-button-secondary">
                   <span className="flex items-center gap-2"><Upload className="size-4" /> Import Leads</span>
                   <input type="file" accept=".csv,text/csv" onChange={importLeads} className="hidden" />
                 </label>
-                <button type="button" onClick={exportActivePipeline} className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700">
+                <button type="button" onClick={exportActivePipeline} className="auralis-button-secondary">
                   <span className="inline-flex items-center gap-2"><Download className="size-4" /> Export Leads</span>
                 </button>
-                <Link href="/settings" className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700">
+                <Link href="/settings" className="auralis-button-secondary">
                   <span className="inline-flex items-center gap-2"><Settings2 className="size-4" /> Card Fields</span>
                 </Link>
               </div>
@@ -604,8 +604,8 @@ export function CRMWorkspace({ view }: CRMWorkspaceProps) {
                       className={cn(
                         "rounded-full px-4 py-2 text-sm font-semibold transition",
                         activePipeline?.id === pipeline.id
-                          ? "bg-slate-950 text-white"
-                          : "border border-slate-200 bg-white text-slate-700",
+                          ? "bg-[linear-gradient(135deg,#2563eb,#3b82f6)] text-white shadow-[0_14px_32px_rgba(37,99,235,0.22)]"
+                          : "border border-slate-200 bg-white/72 text-slate-700",
                       )}
                     >
                       {pipeline.name}
@@ -659,8 +659,8 @@ export function CRMWorkspace({ view }: CRMWorkspaceProps) {
                               className={cn(
                                 "w-full rounded-3xl border p-4 text-left transition",
                                 selectedLead?.id === lead.id
-                                  ? "border-cyan-300 bg-cyan-50 shadow-[0_12px_30px_rgba(8,145,178,0.12)]"
-                                  : "border-slate-200 bg-white hover:border-slate-300",
+                                  ? "border-blue-300 bg-blue-50/80 shadow-[0_12px_30px_rgba(37,99,235,0.12)]"
+                                  : "border-slate-200 bg-white/88 hover:border-slate-300",
                               )}
                             >
                               <div className="flex items-start justify-between gap-3">
@@ -702,13 +702,13 @@ export function CRMWorkspace({ view }: CRMWorkspaceProps) {
                 <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-950">Create pipelines and stages</h2>
                 <form onSubmit={addPipeline} className="mt-5 flex gap-3">
                   <input className="field" placeholder="New pipeline name" value={newPipelineName} onChange={(event) => setNewPipelineName(event.target.value)} />
-                  <button type="submit" className="rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white">
+                  <button type="submit" className="auralis-button-primary">
                     <Plus className="size-4" />
                   </button>
                 </form>
                 <form onSubmit={addStage} className="mt-3 flex gap-3">
                   <input className="field" placeholder="Add stage to active pipeline" value={newStageName} onChange={(event) => setNewStageName(event.target.value)} />
-                  <button type="submit" className="rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700">
+                  <button type="submit" className="auralis-button-secondary">
                     Add
                   </button>
                 </form>
@@ -727,7 +727,7 @@ export function CRMWorkspace({ view }: CRMWorkspaceProps) {
                       onChange={(event) => handleLeadChange(key as keyof typeof emptyLeadForm, event.target.value)}
                     />
                   ))}
-                  <button type="submit" className="rounded-2xl bg-cyan-600 px-4 py-3 text-sm font-semibold text-white">
+                  <button type="submit" className="auralis-button-primary">
                     Save Lead
                   </button>
                 </form>
@@ -780,14 +780,14 @@ export function CRMWorkspace({ view }: CRMWorkspaceProps) {
                           key={button.id}
                           type="button"
                           onClick={() => applyOutcome(button)}
-                          className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-cyan-300 hover:text-cyan-700"
+                          className="auralis-button-secondary"
                         >
                           {button.label}
                         </button>
                       ))}
                     </div>
-                    <div className="mt-5 rounded-3xl border border-cyan-100 bg-cyan-50 p-4">
-                      <p className="text-sm font-semibold text-cyan-800">Next lead control</p>
+                    <div className="mt-5 rounded-3xl border border-blue-100 bg-blue-50/80 p-4">
+                      <p className="text-sm font-semibold text-blue-800">Next lead control</p>
                       <button
                         type="button"
                         onClick={() => {
@@ -796,7 +796,7 @@ export function CRMWorkspace({ view }: CRMWorkspaceProps) {
                             setSelectedLeadId(nextLead.id);
                           }
                         }}
-                        className="mt-3 inline-flex items-center gap-2 rounded-2xl bg-cyan-600 px-4 py-3 text-sm font-semibold text-white"
+                        className="auralis-button-primary mt-3"
                       >
                         Next Lead
                         <ArrowRight className="size-4" />
@@ -836,8 +836,8 @@ export function CRMWorkspace({ view }: CRMWorkspaceProps) {
                     className={cn(
                       "w-full rounded-3xl border p-4 text-left transition",
                       selectedLead?.id === lead.id
-                        ? "border-cyan-300 bg-cyan-50"
-                        : "border-slate-200 bg-white hover:border-slate-300",
+                        ? "border-blue-300 bg-blue-50/80"
+                        : "border-slate-200 bg-white/88 hover:border-slate-300",
                     )}
                   >
                     <div className="flex items-start justify-between gap-3">
@@ -860,7 +860,7 @@ export function CRMWorkspace({ view }: CRMWorkspaceProps) {
               <form onSubmit={addDialBatch} className="mt-5 grid gap-3">
                 <input className="field" placeholder="Session name" value={newDialBatchName} onChange={(event) => setNewDialBatchName(event.target.value)} />
                 <input className="field" type="number" min="1" placeholder="Batch size" value={newDialBatchSize} onChange={(event) => setNewDialBatchSize(event.target.value)} />
-                <button type="submit" className="rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white">
+                <button type="submit" className="auralis-button-primary">
                   Start New Batch
                 </button>
               </form>
@@ -924,7 +924,7 @@ export function CRMWorkspace({ view }: CRMWorkspaceProps) {
             <form onSubmit={addOutcomeButton} className="mt-5 grid gap-3">
               <input className="field" placeholder="Button label" value={newOutcomeLabel} onChange={(event) => setNewOutcomeLabel(event.target.value)} />
               <textarea className="field min-h-28" placeholder="Note template. Example: Left voicemail on {{timestamp}}." value={newOutcomeTemplate} onChange={(event) => setNewOutcomeTemplate(event.target.value)} />
-              <button type="submit" className="rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white">
+              <button type="submit" className="auralis-button-primary">
                 Add Outcome Button
               </button>
             </form>
@@ -939,11 +939,11 @@ export function CRMWorkspace({ view }: CRMWorkspaceProps) {
             <form onSubmit={addScript} className="mt-5 grid gap-3">
               <input className="field" placeholder="Script name" value={newScriptName} onChange={(event) => setNewScriptName(event.target.value)} />
               <textarea className="field min-h-40" placeholder="Paste your script here" value={newScriptBody} onChange={(event) => setNewScriptBody(event.target.value)} />
-              <label className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700">
+              <label className="auralis-button-secondary">
                 <span className="inline-flex items-center gap-2"><Upload className="size-4" /> Upload Script File</span>
                 <input type="file" accept=".txt,.md" onChange={importScriptFile} className="hidden" />
               </label>
-              <button type="submit" className="rounded-2xl bg-cyan-600 px-4 py-3 text-sm font-semibold text-white">
+              <button type="submit" className="auralis-button-primary">
                 Save Script
               </button>
             </form>
@@ -974,7 +974,7 @@ export function CRMWorkspace({ view }: CRMWorkspaceProps) {
               <input className="field" placeholder="Template name" value={newTextTemplateName} onChange={(event) => setNewTextTemplateName(event.target.value)} />
               <textarea className="field min-h-32" placeholder="Text message body with merge fields" value={newTextTemplateBody} onChange={(event) => setNewTextTemplateBody(event.target.value)} />
               <textarea className="field min-h-24" placeholder="One image URL per line. These will be appended as links in the text composer." value={newTextTemplateImages} onChange={(event) => setNewTextTemplateImages(event.target.value)} />
-              <button type="submit" className="rounded-2xl bg-cyan-600 px-4 py-3 text-sm font-semibold text-white">
+              <button type="submit" className="auralis-button-primary">
                 Save Text Template
               </button>
             </form>
@@ -1004,7 +1004,7 @@ function LeadProfileCard({
         {lead && textTemplate ? (
           <a
             href={buildSmsHref(textTemplate, lead)}
-            className="rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white"
+            className="auralis-button-primary"
           >
             <span className="inline-flex items-center gap-2">
               <Send className="size-4" />
@@ -1055,7 +1055,7 @@ function QuickLink({
   label: string;
 }) {
   return (
-    <Link href={href} className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700">
+    <Link href={href} className="auralis-button-secondary">
       <span className="inline-flex items-center gap-2">{icon}{label}</span>
     </Link>
   );
@@ -1071,7 +1071,7 @@ function MetricCard({
   hint: string;
 }) {
   return (
-    <article className="rounded-3xl border border-white/70 bg-white/92 p-5 shadow-[0_18px_60px_rgba(15,23,42,0.08)]">
+    <article className="surface p-5">
       <p className="text-sm font-medium text-slate-500">{label}</p>
       <p className="mt-3 text-3xl font-bold tracking-tight text-slate-950">{value}</p>
       <p className="mt-2 text-sm text-slate-500">{hint}</p>

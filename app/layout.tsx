@@ -3,8 +3,8 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "PolicyFlow CRM",
-  description: "A simple CRM for life insurance agents to manage pipelines, dials, scripts, and texting.",
+  title: "Auralis",
+  description: "Operational Clarity. Powered by Intelligence.",
 };
 
 export default function RootLayout({
