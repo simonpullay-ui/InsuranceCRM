@@ -24,16 +24,16 @@ export function AppShell({ children, userEmail, logout }: AppShellProps) {
 
   return (
     <div className="min-h-screen lg:grid lg:grid-cols-[280px_1fr]">
-      <aside className="border-b border-white/70 bg-slate-950 px-5 py-6 text-white lg:min-h-screen lg:border-b-0 lg:border-r lg:px-6">
+      <aside className="surface border-b border-white/70 bg-white/52 px-5 py-6 text-slate-900 lg:min-h-screen lg:border-b-0 lg:border-r lg:px-6">
         <div className="flex items-center gap-3">
-          <div className="rounded-2xl bg-white/10 p-3">
-            <CircleDollarSign className="size-6 text-cyan-200" />
+          <div className="auralis-brand-mark size-12">
+            <CircleDollarSign className="size-6 text-white" />
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sky-200/80">
-              Internal Ops
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">
+              Operations Core
             </p>
-            <h1 className="text-xl font-bold tracking-tight">BranchPulse</h1>
+            <h1 className="auralis-wordmark text-xl font-bold tracking-tight">Auralis</h1>
           </div>
         </div>
 
@@ -49,8 +49,8 @@ export function AppShell({ children, userEmail, logout }: AppShellProps) {
                 className={cn(
                   "flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition",
                   active
-                    ? "bg-white text-slate-950 shadow-lg"
-                    : "text-slate-200 hover:bg-white/8 hover:text-white",
+                    ? "bg-[linear-gradient(135deg,#2563eb,#3b82f6)] text-white shadow-lg"
+                    : "text-slate-600 hover:bg-white/80 hover:text-slate-950",
                 )}
               >
                 <Icon className="size-4" />
@@ -60,14 +60,11 @@ export function AppShell({ children, userEmail, logout }: AppShellProps) {
           })}
         </nav>
 
-        <div className="mt-8 rounded-3xl border border-white/10 bg-white/6 p-4 text-sm text-slate-200">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-sky-200/80">Signed in as</p>
-          <p className="mt-2 break-all font-medium text-white">{userEmail}</p>
+        <div className="surface-muted mt-8 p-4 text-sm text-slate-700">
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Signed in as</p>
+          <p className="mt-2 break-all font-medium text-slate-950">{userEmail}</p>
           <form action={logout} className="mt-4">
-            <button
-              type="submit"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/8 px-4 py-3 font-semibold text-white transition hover:bg-white/12"
-            >
+            <button type="submit" className="auralis-button-secondary w-full">
               <LogOut className="size-4" />
               Log out
             </button>

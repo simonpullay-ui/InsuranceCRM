@@ -223,7 +223,7 @@ export const sampleState: CRMState = {
       id: "script-1",
       name: "Warm Intro",
       body:
-        "Hi {{lead_name}}, this is Simon with PolicyFlow. I’m calling because you were looking into {{lead_type}} options in {{state}}. I have your date of birth as {{date_of_birth}} and want to make sure I’m tailoring the right coverage review for you.",
+        "Hi {{lead_name}}, this is Simon with Auralis. I’m calling because you were looking into {{lead_type}} options in {{state}}. I have your date of birth as {{date_of_birth}} and want to make sure I’m tailoring the right coverage review for you.",
     },
   ],
   textTemplates: [
